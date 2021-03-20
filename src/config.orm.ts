@@ -1,22 +1,54 @@
-import { NODE_ENV, MONGO_URL, MONGO_PORT, MONGO_DB } from './environments';
+import {
+  NODE_ENV,
+  DATABASE_TYPE,
+  DATABASE_HOST,
+  DATABASE_PORT,
+  DATABASE_USER,
+  DATABASE_PASS,
+  DATABASE_NAME
+} from './environments';
 
 const orm = {
   development: {
-    url: MONGO_URL!,
+    type: DATABASE_TYPE,
+    host: DATABASE_HOST,
+    port: DATABASE_PORT,
+    username: DATABASE_USER,
+    password: DATABASE_PASS,
+    database: DATABASE_NAME,
+    entities: [],
+    synchronize: true
   },
   testing: {
-    url: MONGO_URL!,
+    type: DATABASE_TYPE,
+    host: DATABASE_HOST,
+    port: DATABASE_PORT,
+    username: DATABASE_USER,
+    password: DATABASE_PASS,
+    database: DATABASE_NAME,
+    entities: [],
+    synchronize: true
   },
   staging: {
-    host: 'localhost',
-    port: MONGO_PORT!,
-    username: '',
-    password: '',
-    database: MONGO_DB!,
+    type: DATABASE_TYPE,
+    host: DATABASE_HOST,
+    port: DATABASE_PORT,
+    username: DATABASE_USER,
+    password: DATABASE_PASS,
+    database: DATABASE_NAME,
+    entities: [],
+    synchronize: true
   },
   production: {
-    url: MONGO_URL!,
-  },
+    type: DATABASE_TYPE,
+    host: DATABASE_HOST,
+    port: DATABASE_PORT,
+    username: DATABASE_USER,
+    password: DATABASE_PASS,
+    database: DATABASE_NAME,
+    entities: [],
+    synchronize: true
+  }
 };
 
 export default orm[NODE_ENV!];

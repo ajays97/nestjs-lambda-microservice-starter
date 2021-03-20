@@ -1,204 +1,203 @@
 import {
-	Injectable,
-	ForbiddenException,
-	NotFoundException
-} from '@nestjs/common'
-import { CreateUserDto } from './dto/create-user.dto'
-import { getMongoRepository } from 'typeorm'
-import * as speakeasy from 'speakeasy'
-import { Validator } from 'class-validator'
+  Injectable,
+  ForbiddenException,
+  NotFoundException
+} from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { getRepository } from 'typeorm';
+import * as speakeasy from 'speakeasy';
+import { Validator } from 'class-validator';
 
-import { UserEntity } from './entities/user.entity'
-import { hashPassword } from '../../utils/password'
-import { UpdateUserDto } from './dto/update-user.dto'
-import { ReplaceUserDto } from './dto/replace-user.dto'
+import { User } from './entities/user.entity';
+import { hashPassword } from '../../utils/password';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ReplaceUserDto } from './dto/replace-user.dto';
 
-import { uploadFile } from '../../shared/upload'
+import { uploadFile } from '../../shared/upload';
 
-import { SPEAKEASY_SECRET, SPEAKEASY_STEP } from '../../environments'
-import { OtpResponseDto } from './dto/otp-response.dto'
+import { SPEAKEASY_SECRET, SPEAKEASY_STEP } from '../../environments';
+import { OtpResponseDto } from './dto/otp-response.dto';
 
-const validator = new Validator()
-export type User = any
+const validator = new Validator();
 
 @Injectable()
 export class UsersService {
-	async insert(createUserDto: CreateUserDto): Promise<User | undefined> {
-		const { email } = createUserDto
+  async insert(createUserDto: CreateUserDto): Promise<User | undefined> {
+    const { email } = createUserDto;
 
-		const existedUser = await getMongoRepository(UserEntity).findOne({ email })
+    const existedUser = await getRepository(User).findOne({ email });
 
-		if (existedUser) {
-			throw new ForbiddenException('Email already existed.')
-		}
+    if (existedUser) {
+      throw new ForbiddenException('Email already exists.');
+    }
 
-		const newUser = await getMongoRepository(UserEntity).save(
-			new UserEntity({
-				...createUserDto,
-				password: await hashPassword(createUserDto.password)
-			})
-		)
+    const newUser = {
+      ...createUserDto,
+      password: await hashPassword(createUserDto.password)
+    };
 
-		return newUser
-	}
+    const newCreatedUser = await getRepository(User).save(newUser);
 
-	async findAll(): Promise<User[] | undefined> {
-		// return getMongoRepository(UserEntity).find()
-		return [{user: 'A'}];
-	}
+    return newCreatedUser;
+  }
 
-	async findOne(_id: string): Promise<User | undefined> {
-		const foundUser = await getMongoRepository(UserEntity).findOne({ _id })
+  async findAll(): Promise<User[] | undefined> {
+    // return getRepository(UserEntity).find()
+    return [];
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async findOne(_id: string): Promise<User | undefined> {
+    const foundUser = await getRepository(User).findOne({ _id });
 
-		return foundUser
-	}
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-	async findOneAndReplace(
-		_id: string,
-		replaceUserDto: ReplaceUserDto
-	): Promise<User | undefined> {
-		const foundUser = await getMongoRepository(UserEntity).findOne({ _id })
+    return foundUser;
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async findOneAndReplace(
+    _id: string,
+    replaceUserDto: ReplaceUserDto
+  ): Promise<User | undefined> {
+    const foundUser = await getRepository(User).findOne({ _id });
 
-		const updateUser = await getMongoRepository(UserEntity).save(
-			new UserEntity({
-				...foundUser,
-				...replaceUserDto
-			})
-		)
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-		return updateUser
-	}
+    const updateUser = await getRepository(User).save(
+      new User({
+        ...foundUser,
+        ...replaceUserDto
+      })
+    );
 
-	async findOneAndUpdate(
-		_id: string,
-		updateUserDto: UpdateUserDto
-	): Promise<User | undefined> {
-		const foundUser = await getMongoRepository(UserEntity).findOne({ _id })
+    return updateUser;
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async findOneAndUpdate(
+    _id: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<User | undefined> {
+    const foundUser = await getRepository(User).findOne({ _id });
 
-		const updateUser = await getMongoRepository(UserEntity).save(
-			new UserEntity({
-				...foundUser,
-				...updateUserDto
-			})
-		)
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-		return updateUser
-	}
+    const updateUser = await getRepository(User).save(
+      new User({
+        ...foundUser,
+        ...updateUserDto
+      })
+    );
 
-	async deleteOne(_id: string): Promise<boolean | undefined> {
-		const foundUser = await getMongoRepository(UserEntity).findOne({ _id })
+    return updateUser;
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async deleteOne(_id: string): Promise<boolean | undefined> {
+    const foundUser = await getRepository(User).findOne({ _id });
 
-		return (await getMongoRepository(UserEntity).delete(foundUser))
-			? true
-			: false
-	}
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-	async findOneWithEmail(email: string): Promise<User | undefined> {
-		const foundUser = await getMongoRepository(UserEntity).findOne({ email })
+    return (await getRepository(User).delete(foundUser)) ? true : false;
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async findOneWithEmail(email: string): Promise<User | undefined> {
+    const foundUser = await getRepository(User).findOne({ email });
 
-		return foundUser
-	}
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-	async updateAvatar(_id: string, file: any): Promise<boolean | undefined> {
-		// console.log(_id, file)
-		const foundUser = await getMongoRepository(UserEntity).findOne({ _id })
+    return foundUser;
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async updateAvatar(_id: string, file: any): Promise<boolean | undefined> {
+    // console.log(_id, file)
+    const foundUser = await getRepository(User).findOne({ _id });
 
-		foundUser.avatar = await uploadFile(file)
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-		const updateUser = await getMongoRepository(UserEntity).save(foundUser)
+    foundUser.avatar = await uploadFile(file);
 
-		return updateUser ? true : false
-	}
+    const updateUser = await getRepository(User).save(foundUser);
 
-	async otp(_id: string, phone: string): Promise<OtpResponseDto | undefined> {
-		// validator.isMobilePhone(phone, 'en-SG')
+    return updateUser ? true : false;
+  }
 
-		const foundUser = await getMongoRepository(UserEntity).findOne({
-			where: {
-				_id,
-				verified: false
-			}
-		})
+  async otp(_id: string, phone: string): Promise<OtpResponseDto | undefined> {
+    // validator.isMobilePhone(phone, 'en-SG')
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+    const foundUser = await getRepository(User).findOne({
+      where: {
+        _id,
+        verified: false
+      }
+    });
 
-		const token = await speakeasy.totp({
-			secret: SPEAKEASY_SECRET!,
-			encoding: 'base32',
-			// digits: SPEAKEASY_DIGITS!
-			step: SPEAKEASY_STEP! // 30s
-			// window: 1 // pre 30s cur 30s nxt 30s
-		})
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-		const remaining =
-			SPEAKEASY_STEP - Math.floor((+new Date() / 1000.0) % SPEAKEASY_STEP) + 's'
+    const token = await speakeasy.totp({
+      secret: SPEAKEASY_SECRET!,
+      encoding: 'base32',
+      // digits: SPEAKEASY_DIGITS!
+      step: SPEAKEASY_STEP! // 30s
+      // window: 1 // pre 30s cur 30s nxt 30s
+    });
 
-		foundUser.phone = phone
+    const remaining =
+      SPEAKEASY_STEP -
+      Math.floor((+new Date() / 1000.0) % SPEAKEASY_STEP) +
+      's';
 
-		await getMongoRepository(UserEntity).save(foundUser)
+    foundUser.phone = phone;
 
-		return {
-			otp: +token,
-			remaining
-		}
-	}
+    await getRepository(User).save(foundUser);
 
-	async verify(_id: string, otp: string) {
-		const foundUser = await getMongoRepository(UserEntity).findOne({
-			where: {
-				_id,
-				verified: false
-			}
-		})
+    return {
+      otp: +token,
+      remaining
+    };
+  }
 
-		if (!foundUser) {
-			throw new NotFoundException('User not found.')
-		}
+  async verify(_id: string, otp: string) {
+    const foundUser = await getRepository(User).findOne({
+      where: {
+        _id,
+        verified: false
+      }
+    });
 
-		// console.log(otp)
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
 
-		const verified = await speakeasy.totp.verify({
-			secret: SPEAKEASY_SECRET!,
-			encoding: 'base32',
-			token: otp,
-			step: SPEAKEASY_STEP!, // 30s
-			window: 1
-		})
+    // console.log(otp)
 
-		// console.log(verified)
+    const verified = await speakeasy.totp.verify({
+      secret: SPEAKEASY_SECRET!,
+      encoding: 'base32',
+      token: otp,
+      step: SPEAKEASY_STEP!, // 30s
+      window: 1
+    });
 
-		if (verified) {
-			foundUser.verified = true
+    // console.log(verified)
 
-			return await getMongoRepository(UserEntity).save(foundUser)
-		}
+    if (verified) {
+      foundUser.verified = true;
 
-		throw new ForbiddenException('Otp is incorrect.')
-	}
+      return await getRepository(User).save(foundUser);
+    }
+
+    throw new ForbiddenException('Otp is incorrect.');
+  }
 }
