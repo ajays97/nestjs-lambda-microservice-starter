@@ -1,16 +1,11 @@
 import {
   Entity,
-  ObjectIdColumn,
   Column,
-  PrimaryColumn,
-  Generated,
-  Unique,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { uuidv4 } from '../../../utils/uuid';
-import { Exclude, plainToClass } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({
@@ -74,15 +69,18 @@ export class User {
 
   @ApiProperty({ description: 'The createdAt of the User' })
   @Column()
+  @Exclude()
   @CreateDateColumn()
   createdAt: number;
 
   @ApiProperty({ description: 'The updatedAt of the User' })
   @Column()
+  @Exclude()
   @UpdateDateColumn()
   updatedAt: number;
 
   constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
     // if (partial) {
     //   Object.assign(this, partial);
     //   this._id = this._id || uuidv4();
