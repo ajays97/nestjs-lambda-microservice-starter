@@ -19,7 +19,7 @@ export class AuthService {
 
     if (user && (await comparePassword(password, user.password))) {
       // tslint:disable-next-line: no-shadowed-variable
-      const { password, ...result } = user;
+      const { _password, ...result } = user;
 
       return result;
     }
@@ -41,7 +41,7 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload, {
         expiresIn
       }),
-      user: new User({ ...user }),
+      user,
       expiresIn
     };
   }

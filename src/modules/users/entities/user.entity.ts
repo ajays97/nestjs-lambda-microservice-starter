@@ -33,8 +33,10 @@ export class User {
 
   @ApiProperty({ description: 'The password of the User' })
   @Exclude()
-  @Column()
-  password: string;
+  @Column({
+    select: false
+  })
+  _password: string;
 
   @ApiProperty({ description: 'The referralCode of the User' })
   @Column()
@@ -68,15 +70,17 @@ export class User {
   verified: boolean;
 
   @ApiProperty({ description: 'The createdAt of the User' })
-  @Column()
   @Exclude()
-  @CreateDateColumn()
+  @CreateDateColumn({
+    select: false
+  })
   createdAt: number;
 
   @ApiProperty({ description: 'The updatedAt of the User' })
-  @Column()
   @Exclude()
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    select: false
+  })
   updatedAt: number;
 
   constructor(partial: Partial<User>) {

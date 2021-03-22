@@ -33,7 +33,7 @@ export class UsersService {
 
     const newUser = {
       ...createUserDto,
-      password: await hashPassword(createUserDto.password)
+      _password: await hashPassword(createUserDto.password)
     };
 
     const newCreatedUser = await getRepository(User).save(newUser);
