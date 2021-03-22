@@ -12,26 +12,27 @@ import {
   Delete,
   UploadedFile,
   Request
-} from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiUseTags,
   ApiOperation,
   ApiResponse,
-  ApiConsumes} from '@nestjs/swagger'
-import { FileInterceptor } from '@nestjs/platform-express'
-import * as jwt from 'jsonwebtoken'
+  ApiConsumes
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as jwt from 'jsonwebtoken';
 
-import { UserEntity } from './entities/user.entity'
-import { CreateUserDto } from './dto/create-user.dto'
-import { UsersService } from './users.service'
-import { UpdateUserDto } from './dto/update-user.dto'
-import { ReplaceUserDto } from './dto/replace-user.dto'
-import { ErrorResponseDto } from './dto/error-response.dto'
-import { LoginResponseDto } from './dto/login-response.dto'
-import { OtpResponseDto } from './dto/otp-response.dto'
-import { AuthService } from '../../auth/auth.service'
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ReplaceUserDto } from './dto/replace-user.dto';
+import { ErrorResponseDto } from './dto/error-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { OtpResponseDto } from './dto/otp-response.dto';
+import { AuthService } from '../../auth/auth.service';
 
 @ApiResponse({
   status: 401,
@@ -45,12 +46,12 @@ export class UsersController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UsersService
-  ) { }
+  ) {}
 
   @ApiResponse({
     status: 200,
     description: 'The found records',
-    type: [UserEntity]
+    type: [User]
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
@@ -59,7 +60,7 @@ export class UsersController {
   })
   @Get()
   findAll() {
-    return this.userService.findAll()
+    return this.userService.findAll();
   }
 
   @ApiResponse({
@@ -72,17 +73,17 @@ export class UsersController {
   })
   @Post()
   async insert(@Body() createUserDto: CreateUserDto) {
-    const newUser = await this.userService.insert(createUserDto)
+    const newUser = await this.userService.insert(createUserDto);
 
-    const loginResponseDto = await this.authService.login(newUser)
+    const loginResponseDto = await this.authService.login(newUser);
 
-    return loginResponseDto
+    return loginResponseDto;
   }
 
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: UserEntity
+    type: User
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
@@ -91,7 +92,7 @@ export class UsersController {
   })
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(id)
+    return this.userService.findOne(id);
   }
 
   @ApiBearerAuth()
@@ -101,7 +102,7 @@ export class UsersController {
   })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.findOneAndUpdate(id, updateUserDto)
+    return this.userService.findOneAndUpdate(id, updateUserDto);
   }
 
   @ApiBearerAuth()
@@ -111,7 +112,7 @@ export class UsersController {
   })
   @Put(':id')
   replace(@Param('id') id: string, @Body() replaceUserDto: ReplaceUserDto) {
-    return this.userService.findOneAndReplace(id, replaceUserDto)
+    return this.userService.findOneAndReplace(id, replaceUserDto);
   }
 
   @ApiResponse({
@@ -126,7 +127,7 @@ export class UsersController {
   })
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.deleteOne(id)
+    return this.userService.deleteOne(id);
   }
 
   @ApiResponse({
@@ -143,10 +144,10 @@ export class UsersController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('avatar'))
   updateAvatar(@Request() req, @UploadedFile() file) {
-    const { user } = req
-    const { _id } = user
+    const { user } = req;
+    const { _id } = user;
 
-    return this.userService.updateAvatar(_id, file)
+    return this.userService.updateAvatar(_id, file);
   }
 
   @ApiBearerAuth()
@@ -161,10 +162,10 @@ export class UsersController {
   })
   @Post('/otp/:phone')
   otp1(@Request() req, @Param('phone') phone: string) {
-    const { user } = req
-    const { _id } = user
+    const { user } = req;
+    const { _id } = user;
 
-    return this.userService.otp(_id, phone)
+    return this.userService.otp(_id, phone);
   }
 
   @ApiBearerAuth()
@@ -182,13 +183,13 @@ export class UsersController {
     @Request() req,
     @Param('otp') otp: string
   ): Promise<LoginResponseDto | undefined> {
-    const { user } = req
-    const { _id } = user
+    const { user } = req;
+    const { _id } = user;
 
-    const updateUser = await this.userService.verify(_id, otp)
+    const updateUser = await this.userService.verify(_id, otp);
 
-    const loginResponseDto = await this.authService.login(updateUser)
+    const loginResponseDto = await this.authService.login(updateUser);
 
-    return loginResponseDto
+    return loginResponseDto;
   }
 }

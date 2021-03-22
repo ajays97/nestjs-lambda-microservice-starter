@@ -1,31 +1,31 @@
-import { ExtractJwt, Strategy } from 'passport-jwt'
-import { PassportStrategy } from '@nestjs/passport'
-import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { ACCESS_TOKEN_SECRET } from '../environments'
-import { getMongoRepository } from 'typeorm'
-import { UserEntity } from '../modules/users/entities/user.entity'
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ACCESS_TOKEN_SECRET } from '../environments';
+import { getRepository } from 'typeorm';
+import { User } from '../modules/users/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-	constructor() {
-		super({
-			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-			ignoreExpiration: false,
-			secretOrKey: ACCESS_TOKEN_SECRET!
-		})
-	}
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: ACCESS_TOKEN_SECRET!
+    });
+  }
 
-	async validate(payload: any) {
-		try {
-			const { sub } = payload
+  async validate(payload: any) {
+    try {
+      const { sub } = payload;
 
-			const user = await getMongoRepository(UserEntity).findOne({ _id: sub })
+      const user = await getRepository(User).findOne({ _id: sub });
 
-			const { password, ...result } = user
+      const { password, ...result } = user;
 
-			return result
-		} catch (err) {
-			throw new UnauthorizedException('Email or password is incorrect.')
-		}
-	}
+      return result;
+    } catch (err) {
+      throw new UnauthorizedException('Email or password is incorrect.');
+    }
+  }
 }
