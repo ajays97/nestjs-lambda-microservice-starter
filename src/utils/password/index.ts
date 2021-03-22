@@ -1,4 +1,4 @@
-import { hash, compare } from 'bcrypt';
+import { hash, verify } from 'argon2';
 
 import { SALT } from '../../environments';
 
@@ -14,7 +14,7 @@ import { SALT } from '../../environments';
  * @beta
  */
 export const hashPassword = async (password: string): Promise<string> => {
-  return await hash(password, SALT);
+  return await hash(password);
 };
 
 /**
@@ -31,7 +31,7 @@ export const hashPassword = async (password: string): Promise<string> => {
  */
 export const comparePassword = async (
   password: string,
-  hash: string,
+  hash: string
 ): Promise<boolean> => {
-  return await compare(password, hash);
+  return await verify(hash, password);
 };
